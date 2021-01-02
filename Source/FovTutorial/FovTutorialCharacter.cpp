@@ -129,16 +129,13 @@ void AFovTutorialCharacter::Tick(float Delta)
 		{
 			const auto ViewportSize = LocalPlayer->ViewportClient->Viewport->GetSizeXY();
 			const auto MaxFit = DarkMagic::GetMaxFittingResolution(1920.0f, 1080.f, ViewportSize.X, ViewportSize.Y);
-			const float Width = static_cast<float>(ViewportSize.X);
-			const float Height = static_cast<float>(ViewportSize.Y);
 
 			if (MaxFit.AspectCorrection == DarkMagic::ResolutionInformation::EAspectCorrection::PILLAR_BOX)
 			{
-				FirstPersonCameraComponent->SetAspectRatio(Width / Height);
-
+				FirstPersonCameraComponent->SetAspectRatio(static_cast<float>(ViewportSize.X) / static_cast<float>(ViewportSize.Y));
+				
 				const float HorPlusFov = DarkMagic::HorFovToHorPlus(InitialFieldOfView, 1920.0f, 1080.f, ViewportSize.X, ViewportSize.Y);
 				FirstPersonCameraComponent->SetFieldOfView(HorPlusFov);
-
 				FirstPersonCameraComponent->SetConstraintAspectRatio(false);
 			}
 			else
