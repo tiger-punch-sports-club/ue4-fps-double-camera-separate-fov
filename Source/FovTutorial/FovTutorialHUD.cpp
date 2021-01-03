@@ -19,11 +19,11 @@ AFovTutorialHUD::AFovTutorialHUD()
 void AFovTutorialHUD::DrawHUD()
 {
 	Super::DrawHUD();
-
-	FVector2D CrosshairDrawPoint(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
-
-#if 0
-	const FVector2D CrosshairCenterOffset(0, 0);
+	
+	const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+	
+	const FVector2D TargetOffset(0, 0);
+	FVector2D Offset;
 
 	if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
 	{
@@ -31,34 +31,35 @@ void AFovTutorialHUD::DrawHUD()
 		if (LocalPlayer && LocalPlayer->ViewportClient && LocalPlayer->ViewportClient->Viewport)
 		{
 			auto* Viewport = LocalPlayer->ViewportClient->Viewport;
+            
 			const auto ViewportSize = Viewport->GetSizeXY();
-
 			const FVector2D TargetResolution(1920.0f, 1080.f);
 
-			const auto MaxFit = DarkMagic::GetMaxFittingResolution(TargetResolution.X, TargetResolution.Y,
-                                                           static_cast<float>(ViewportSize.X), static_cast<float>(ViewportSize.Y));
+			const auto MaxFit = DarkMagic::GetMaxFittingResolution(TargetResolution.X, TargetResolution.Y, ViewportSize.X, ViewportSize.Y);
 
 			if (MaxFit.AspectCorrection == DarkMagic::ResolutionInformation::EAspectCorrection::PILLAR_BOX)
 			{
-				CrosshairDrawPoint.X += CrosshairCenterOffset.X * MaxFit.PixelScale.X;
-				CrosshairDrawPoint.Y += CrosshairCenterOffset.Y * MaxFit.PixelScale.Y;
+				Offset.X = TargetOffset.X * MaxFit.PixelScale.X;
+				Offset.Y = TargetOffset.Y * MaxFit.PixelScale.Y;
 			}
 			else
 			{
 				const FVector2D PixelScale(Canvas->ClipX / TargetResolution.X, Canvas->ClipY / TargetResolution.Y);
-				CrosshairDrawPoint.X += CrosshairCenterOffset.X * PixelScale.X;
-				CrosshairDrawPoint.Y += CrosshairCenterOffset.Y * PixelScale.Y;
+				Offset.X = TargetOffset.X * PixelScale.X;
+				Offset.Y = TargetOffset.Y * PixelScale.Y;
 			}
-			
 		}
 	}
-#endif
 
-	const FVector2D CrosshairSize(CrosshairTex->GetSurfaceWidth(), CrosshairTex->GetSurfaceHeight());
-	const FVector2D CrosshairDrawPosition( (CrosshairDrawPoint.X - CrosshairSize.X * 0.5f),
-										   (CrosshairDrawPoint.Y - CrosshairSize.Y * 0.5f));
+	const float Scale = 1.0f;
+	const FVector2D CrosshairSize(CrosshairTex->GetSurfaceWidth() * Scale, CrosshairTex->GetSurfaceHeight() * Scale);
+    
+	const FVector2D CrosshairDrawPosition(Center.X + Offset.X - CrosshairSize.X * 0.5f,
+                                          Center.Y + Offset.Y - CrosshairSize.Y * 0.5f);
 
-	FCanvasTileItem TileItem( CrosshairDrawPosition, CrosshairTex->Resource, CrosshairSize, FLinearColor::White);
+
+	// draw the crosshair
+	FCanvasTileItem TileItem(CrosshairDrawPosition, CrosshairTex->Resource, CrosshairSize, FLinearColor::White);
 	TileItem.BlendMode = SE_BLEND_Translucent;
-	Canvas->DrawItem( TileItem );
+	Canvas->DrawItem(TileItem);
 }
